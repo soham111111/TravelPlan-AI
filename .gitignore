@@ -1,0 +1,7 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+travelplan.db
+.DS_Store
+.DS_Store

@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TravelPlan – AI-Powered Travel Planning</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,700;0,800;1,700;1,800&family=Barlow:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Barlow', sans-serif;
+            background: #0f172a;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        /* ============ NAVBAR ============ */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 400;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2.5rem;
+            height: 64px;
+            background: rgba(15, 23, 42, 0.82);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+        }
+
+        .nav-logo {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: white;
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .nav-logo span {
+            color: #38bdf8;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-link {
+            color: rgba(255, 255, 255, 0.75);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.85rem;
+            padding: 0.4rem 1rem;
+            border-radius: 999px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.2s;
+        }
+
+        .nav-link:hover {
+            color: white;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-cta {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: white;
+            color: #0f172a;
+            padding: 0.55rem 1.4rem;
+            border-radius: 999px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.25s;
+        }
+
+        .nav-cta:hover {
+            background: #38bdf8;
+            color: #0f172a;
+            transform: translateY(-1px);
+        }
+
+        /* ============ HERO ============ */
+        .hero {
+            min-height: 100vh;
+            background: url('/static/hero_bg.png') center center / cover no-repeat;
+            background-color: #020d24;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 0 4rem 5rem;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to bottom,
+                    rgba(2, 8, 30, 0.25) 0%,
+                    rgba(2, 8, 30, 0.45) 40%,
+                    rgba(2, 8, 30, 0.82) 80%,
+                    rgba(2, 8, 30, 0.95) 100%);
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            max-width: 900px;
+        }
+
+        .hero-eyebrow {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: #38bdf8;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .hero-eyebrow::before {
+            content: '✦';
+        }
+
+        .hero h1 {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: clamp(5rem, 12vw, 11rem);
+            font-weight: 800;
+            line-height: 0.9;
+            color: white;
+            text-transform: uppercase;
+            letter-spacing: -1px;
+            margin-bottom: 1.5rem;
+            text-shadow: 0 4px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .hero h1 span {
+            color: #38bdf8;
+            font-style: italic;
+        }
+
+        .hero-sub {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.7);
+            max-width: 520px;
+            line-height: 1.7;
+            margin-bottom: 2.5rem;
+        }
+
+        /* Quick nav pills at the bottom of hero — like ATB */
+        .hero-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        .hero-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255, 255, 255, 0.12);
+            border: 1.5px solid rgba(255, 255, 255, 0.28);
+            color: white;
+            padding: 0.65rem 1.4rem;
+            border-radius: 999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-decoration: none;
+            backdrop-filter: blur(8px);
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            transition: all 0.25s;
+        }
+
+        .hero-pill:hover {
+            background: white;
+            color: #0f172a;
+            border-color: white;
+            transform: translateY(-2px);
+        }
+
+        .hero-pill-primary {
+            background: #38bdf8;
+            border-color: #38bdf8;
+            color: #0f172a;
+            font-weight: 700;
+        }
+
+        .hero-pill-primary:hover {
+            background: #7dd3fc;
+            border-color: #7dd3fc;
+            color: #0f172a;
+        }
+
+        /* ============ STATS STRIP ============ */
+        .stats-strip {
+            background: #1e293b;
+            border-top: 1px solid rgba(255, 255, 255, 0.07);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+            padding: 1.75rem 4rem;
+            display: flex;
+            align-items: center;
+            gap: 4rem;
+            flex-wrap: wrap;
+        }
+
+        .stat-label {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2.5px;
+            color: rgba(255, 255, 255, 0.45);
+            display: block;
+            margin-bottom: 0.2rem;
+        }
+
+        .stat-value {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 2.4rem;
+            font-weight: 800;
+            color: #38bdf8;
+            line-height: 1;
+            text-transform: uppercase;
+        }
+
+        /* ============ SPLIT SECTIONS (ATB style) ============ */
+        .split-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            min-height: 480px;
+        }
+
+        .split-text {
+            background: #1e293b;
+            padding: 4rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .split-text.dark {
+            background: #0f172a;
+        }
+
+        .split-text.blue {
+            background: #0c2a4a;
+        }
+
+        .split-eyebrow {
+            font-size: 0.68rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: #38bdf8;
+            margin-bottom: 1rem;
+        }
+
+        .split-h {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: clamp(3rem, 5vw, 5rem);
+            font-weight: 800;
+            color: white;
+            text-transform: uppercase;
+            line-height: 0.95;
+            margin-bottom: 1.25rem;
+        }
+
+        .split-p {
+            color: rgba(255, 255, 255, 0.62);
+            font-size: 0.98rem;
+            line-height: 1.7;
+            max-width: 380px;
+            margin-bottom: 1.75rem;
+        }
+
+        .split-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #38bdf8;
+            color: #0f172a;
+            padding: 0.75rem 1.75rem;
+            border-radius: 999px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.25s;
+            align-self: flex-start;
+        }
+
+        .split-btn:hover {
+            background: #7dd3fc;
+            transform: translateY(-2px);
+        }
+
+        .split-btn-outline {
+            background: transparent;
+            border: 2px solid rgba(255, 255, 255, 0.35);
+            color: white;
+        }
+
+        .split-btn-outline:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: white;
+            transform: translateY(-2px);
+        }
+
+        .split-image {
+            background: #0ea5e9;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .split-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.9;
+        }
+
+        /* Placeholder image panels with gradient + emoji */
+        .img-panel {
+            width: 100%;
+            height: 100%;
+            min-height: 480px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 8rem;
+            position: relative;
+        }
+
+        .ip-dest {
+            background: linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%);
+        }
+
+        .ip-food {
+            background: linear-gradient(135deg, #f59e0b 0%, #dc2626 100%);
+        }
+
+        .ip-ai {
+            background: linear-gradient(135deg, #6366f1 0%, #0ea5e9 100%);
+        }
+
+        .img-panel::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, transparent 60%);
+        }
+
+        /* ============ FEATURES GRID ============ */
+        .features-section {
+            background: #020d24;
+            padding: 6rem 4rem;
+        }
+
+        .features-heading {
+            margin-bottom: 3.5rem;
+        }
+
+        .feat-eyebrow {
+            font-size: 0.68rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: #38bdf8;
+            margin-bottom: 0.75rem;
+        }
+
+        .feat-h {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: clamp(3rem, 5vw, 4.5rem);
+            font-weight: 800;
+            color: white;
+            text-transform: uppercase;
+            line-height: 0.95;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .feat-card {
+            background: #1e293b;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 12px;
+            padding: 2rem 1.75rem;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #38bdf8, #0ea5e9);
+            transform: scaleX(0);
+            transition: transform 0.35s;
+            transform-origin: left;
+        }
+
+        .feat-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(56, 189, 248, 0.3);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 30px rgba(56, 189, 248, 0.06);
+        }
+
+        .feat-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .feat-icon {
+            font-size: 2.2rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .feat-num {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: rgba(56, 189, 248, 0.6);
+            margin-bottom: 0.5rem;
+        }
+
+        .feat-card h3 {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 700;
+            font-size: 1.4rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: white;
+            margin-bottom: 0.6rem;
+        }
+
+        .feat-card p {
+            color: rgba(255, 255, 255, 0.52);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        /* ============ CTA — editorial dark ============ */
+        .cta-section {
+            background: #0c1f3a;
+            padding: 7rem 4rem;
+            display: flex;
+            align-items: center;
+            gap: 5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .cta-text {
+            flex: 1;
+        }
+
+        .cta-eyebrow {
+            font-size: 0.68rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: #38bdf8;
+            margin-bottom: 1rem;
+        }
+
+        .cta-h {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: clamp(3rem, 5vw, 5.5rem);
+            font-weight: 800;
+            color: white;
+            text-transform: uppercase;
+            line-height: 0.95;
+            margin-bottom: 1.5rem;
+        }
+
+        .cta-p {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 1rem;
+            line-height: 1.7;
+            max-width: 420px;
+        }
+
+        .cta-actions {
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+
+        /* ============ FOOTER ============ */
+        footer {
+            background: #060d1e;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            padding: 2rem 4rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        footer p {
+            color: rgba(255, 255, 255, 0.35);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        footer a {
+            color: #38bdf8;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* ============ TRIP PLANNER SIDEBAR TAB (ATB style) ============ */
+        .trip-planner-tab {
+            position: fixed;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%) rotate(0deg);
+            z-index: 500;
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+        }
+
+        .trip-planner-tab a {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #0f172a;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-right: none;
+            color: white;
+            padding: 1.5rem 0.75rem;
+            text-decoration: none;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            border-radius: 8px 0 0 8px;
+            transition: background 0.2s;
+        }
+
+        .trip-planner-tab a:hover {
+            background: #1e293b;
+        }
+
+        @media (max-width: 900px) {
+            .split-section {
+                grid-template-columns: 1fr;
+            }
+
+            .split-image {
+                min-height: 280px;
+            }
+
+            nav {
+                padding: 0 1.25rem;
+            }
+
+            .hero {
+                padding: 0 1.5rem 4rem;
+            }
+
+            .stats-strip {
+                padding: 1.5rem;
+                gap: 2rem;
+            }
+
+            .features-section {
+                padding: 4rem 1.5rem;
+            }
+
+            .cta-section {
+                flex-direction: column;
+                padding: 4rem 1.5rem;
+                gap: 2rem;
+            }
+
+            footer {
+                padding: 1.5rem;
+            }
+
+            .trip-planner-tab {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Sticky Navbar -->
+    <nav>
+        <a href="/" class="nav-logo">✈ Travel<span>Plan</span></a>
+        <div class="nav-links">
+            <a href="/login" class="nav-link">Login</a>
+            <a href="/signup" class="nav-cta">✦ Get Started Free</a>
+        </div>
+    </nav>
+
+    <!-- Trip Planner Sidebar Tab (ATB-style) -->
+    <div class="trip-planner-tab">
+        <a href="/login">✦ Trip Planner</a>
+    </div>
+
+    <!-- ===== HERO ===== -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-eyebrow">AI-Powered Travel Platform</div>
+            <h1>Discover<br>Your Next<br><span>Adventure</span></h1>
+            <p class="hero-sub">
+                Intelligent destination recommendations, AI itineraries, local food guides, real-time weather — all in
+                one platform.
+            </p>
+            <div class="hero-pills">
+                <a href="/signup" class="hero-pill hero-pill-primary">✦ Start Planning Free</a>
+                <a href="/login" class="hero-pill">🌍 Find Destinations</a>
+                <a href="/login" class="hero-pill">🗓️ Build Itinerary</a>
+                <a href="/login" class="hero-pill">💬 Ask AI Assistant</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== STATS STRIP ===== -->
+    <div class="stats-strip">
+        <div>
+            <span class="stat-label">Destinations</span>
+            <span class="stat-value">480+</span>
+        </div>
+        <div>
+            <span class="stat-label">Languages Supported</span>
+            <span class="stat-value">12</span>
+        </div>
+        <div>
+            <span class="stat-label">Powered By</span>
+            <span class="stat-value">AI</span>
+        </div>
+        <div>
+            <span class="stat-label">Cost to Start</span>
+            <span class="stat-value">Free</span>
+        </div>
+    </div>
+
+    <!-- ===== SPLIT: Destinations ===== -->
+    <div class="split-section">
+        <div class="split-text dark">
+            <p class="split-eyebrow">✦ AI Recommendations</p>
+            <h2 class="split-h">Find<br>Your Perfect<br>Destination</h2>
+            <p class="split-p">Our ML algorithms analyze your travel style, budget and preferences to surface the best
+                destinations tailored just for you, from 480+ global options.</p>
+            <a href="/login" class="split-btn">✦ Explore Destinations</a>
+        </div>
+        <div class="split-image">
+            <img src="/static/split_dest.png" alt="AI Destination Recommendations"
+                style="width:100%;height:100%;min-height:480px;object-fit:cover;object-position:center;display:block;">
+        </div>
+    </div>
+
+    <!-- ===== SPLIT: Itinerary (reversed) ===== -->
+    <div class="split-section">
+        <div class="split-image">
+            <img src="/static/split_itin.png" alt="Travel Itinerary Planning"
+                style="width:100%;height:100%;min-height:480px;object-fit:cover;object-position:center;display:block;">
+        </div>
+        <div class="split-text blue">
+            <p class="split-eyebrow">✦ Smart Planning</p>
+            <h2 class="split-h">Day-by-Day<br>Itinerary<br>Builder</h2>
+            <p class="split-p">Get a complete day-by-day travel plan generated by AI, optimized for your dates, travel
+                pace, and interests — in seconds.</p>
+            <a href="/login" class="split-btn">✦ Build My Itinerary</a>
+        </div>
+    </div>
+
+    <!-- ===== SPLIT: AI Chatbot ===== -->
+    <div class="split-section">
+        <div class="split-text dark">
+            <p class="split-eyebrow">✦ 24/7 AI Assistant</p>
+            <h2 class="split-h">Ask Me<br>Anything<br>About Travel</h2>
+            <p class="split-p">Your personal AI travel assistant is always available. Get tips on hidden gems, packing,
+                safety, budget, local customs and more.</p>
+            <a href="/login" class="split-btn split-btn-outline">✦ Chat with AI</a>
+        </div>
+        <div class="split-image">
+            <img src="/static/split_chat.png" alt="AI Travel Chatbot"
+                style="width:100%;height:100%;min-height:480px;object-fit:cover;object-position:center;display:block;">
+        </div>
+    </div>
+
+    <!-- ===== FEATURES GRID ===== -->
+    <section class="features-section">
+        <div class="features-heading">
+            <p class="feat-eyebrow">✦ Full Platform</p>
+            <h2 class="feat-h">Everything<br>You Need<br>to Explore</h2>
+        </div>
+        <div class="features-grid">
+            <div class="feat-card">
+                <span class="feat-num">01</span>
+                <span class="feat-icon">🌍</span>
+                <h3>AI Destinations</h3>
+                <p>ML-powered recommendations matched to your travel style and budget.</p>
+            </div>
+            <div class="feat-card">
+                <span class="feat-num">02</span>
+                <span class="feat-icon">🗓️</span>
+                <h3>Itinerary Builder</h3>
+                <p>Auto-generated day-by-day travel plans for any destination.</p>
+            </div>
+            <div class="feat-card">
+                <span class="feat-num">03</span>
+                <span class="feat-icon">🍽️</span>
+                <h3>Food Guide</h3>
+                <p>Discover authentic local cuisine and dining spots at your destination.</p>
+            </div>
+            <div class="feat-card">
+                <span class="feat-num">04</span>
+                <span class="feat-icon">🚌</span>
+                <h3>Transport Navigator</h3>
+                <p>Bus routes, rail, road networks — all transport options at a glance.</p>
+            </div>
+            <div class="feat-card">
+                <span class="feat-num">05</span>
+                <span class="feat-icon">🌤️</span>
+                <h3>Weather & Currency</h3>
+                <p>Live weather forecasts and real-time currency conversion tools.</p>
+            </div>
+            <div class="feat-card">
+                <span class="feat-num">06</span>
+                <span class="feat-icon">💬</span>
+                <h3>AI Chatbot</h3>
+                <p>Ask your travel assistant anything — available 24/7 via Gemini AI.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== CTA ===== -->
+    <section class="cta-section">
+        <div class="cta-text">
+            <p class="cta-eyebrow">✦ Start Today</p>
+            <h2 class="cta-h">Ready to<br>Plan Your<br>Next Trip?</h2>
+            <p class="cta-p">Join travellers planning smarter trips with AI. It's completely free to get started — no
+                credit card needed.</p>
+        </div>
+        <div class="cta-actions">
+            <a href="/signup" class="split-btn" style="font-size: 1rem; padding: 1rem 2.5rem;">✦ Create Free Account</a>
+            <a href="/login" class="split-btn split-btn-outline"
+                style="font-size: 1rem; padding: 1rem 2.5rem;">Login</a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p>© 2026 TravelPlan · AI-Powered Travel Planning</p>
+        <p><a href="/login">Login</a> &nbsp;·&nbsp; <a href="/signup">Sign Up</a></p>
+    </footer>
+
+    <!-- Chatbot -->
+    <div id="chatbot"></div>
+    <script src="/static/chatbot.js"></script>
+</body>
+
+</html>

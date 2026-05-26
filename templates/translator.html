@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Translator - TravelPlan</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+    <header>
+        <h1>✈️ TravelPlan</h1>
+        <div>
+            <span>Welcome, <strong>{{ user }}</strong></span>
+            <a href="/dashboard">Dashboard</a> |
+            <a href="/logout">Sign Out</a>
+        </div>
+    </header>
+
+    <div class="destinations-container">
+        <div class="card" style="margin-top: 2rem;">
+            <h2 style="margin-bottom: 1.5rem;">🌐 Language Translator</h2>
+            <form method="post" style="display: flex; flex-direction: column; gap: 1.5rem;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                <div>
+                    <label
+                        style="display: block; margin-bottom: 0.5rem; color: var(--text-dark); font-weight: 600;">Text
+                        to Translate</label>
+                    <div style="position: relative;">
+                        <textarea name="text" id="inputText" placeholder="Enter text to translate..." rows="4" required
+                            style="width: 100%; resize: vertical;">{{ original_text if original_text else '' }}</textarea>
+                        {% if original_text %}
+                        <button type="button"
+                            onclick="speakText({{ original_text | tojson }}, {{ from_lang | tojson }})"
+                            style="position: absolute; bottom: 10px; right: 10px; padding: 0.5rem 1rem; background: var(--primary-color); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.85rem;"
+                            title="Listen to original text">
+                            🔊 Listen
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div>
+                        <label
+                            style="display: block; margin-bottom: 0.5rem; color: var(--text-dark); font-weight: 600;">From
+                            Language</label>
+                        <select name="from_lang" id="fromLang" required style="width: 100%;">
+                            {% for code, name in languages %}
+                            <option value="{{ code }}" {% if from_lang==code or (not from_lang and code=="en" )
+                                %}selected{% endif %}>{{ name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label
+                            style="display: block; margin-bottom: 0.5rem; color: var(--text-dark); font-weight: 600;">To
+                            Language</label>
+                        <select name="to_lang" id="toLang" required style="width: 100%;">
+                            {% for code, name in languages %}
+                            <option value="{{ code }}" {% if to_lang==code or (not to_lang and code=="es" ) %}selected{%
+                                endif %}>{{ name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <button type="submit">🌐 Translate</button>
+            </form>
+        </div>
+
+        {% if error %}
+        <div class="error" style="margin-top: 1.5rem;">
+            {{ error }}
+        </div>
+        {% endif %}
+
+        {% if translated_text %}
+        <div class="card" style="margin-top: 2rem;">
+            <h2 style="margin-bottom: 1.5rem;">✅ Translation Result</h2>
+            <div style="padding: 1.5rem; background: var(--bg-light); border-radius: 8px; position: relative;">
+                <div
+                    style="font-size: 1.2rem; line-height: 1.8; color: var(--text-dark); margin-bottom: {% if pronunciation %}1rem{% else %}0{% endif %}; padding-right: 100px;">
+                    {{ translated_text }}
+                </div>
+                <button type="button" onclick="speakText({{ translated_text | tojson }}, {{ to_lang | tojson }})"
+                    style="position: absolute; top: 15px; right: 15px; padding: 0.75rem 1.25rem; background: var(--primary-color); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 0.9rem; font-weight: 600; transition: all 0.3s;"
+                    onmouseover="this.style.background='#197896'" onmouseout="this.style.background='#2193b0'"
+                    title="Listen to translation">
+                    🔊 Listen
+                </button>
+                {% if pronunciation %}
+                <div style="padding-top: 1rem; border-top: 1px solid var(--border-color);">
+                    <div style="font-size: 0.9rem; color: var(--text-light); margin-bottom: 0.5rem; font-weight: 600;">
+                        📖 Pronunciation Guide:</div>
+                    <div style="font-size: 1rem; line-height: 1.6; color: var(--primary-color); font-style: italic;">
+                        {{ pronunciation }}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div id="chatbot"></div>
+
+
+    <script>
+        function speakText(text, lang) {
+            if (!('speechSynthesis' in window)) {
+                alert('Your browser does not support text-to-speech.');
+                return;
+            }
+            window.speechSynthesis.cancel();
+            const langMap = {
+                'en': 'en-US', 'es': 'es-ES', 'fr': 'fr-FR', 'de': 'de-DE',
+                'it': 'it-IT', 'pt': 'pt-PT', 'ru': 'ru-RU', 'ja': 'ja-JP',
+                'ko': 'ko-KR', 'zh': 'zh-CN', 'ar': 'ar-SA', 'hi': 'hi-IN'
+            };
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = langMap[lang] || 'en-US';
+            utterance.rate = 0.92;
+            utterance.volume = 1;
+            // Match a voice if available; speak immediately to preserve click context
+            const voices = window.speechSynthesis.getVoices();
+            if (voices.length > 0) {
+                const match = voices.find(v => v.lang.startsWith(lang));
+                if (match) utterance.voice = match;
+            }
+            utterance.onerror = e => console.error('TTS error:', e.error);
+            window.speechSynthesis.speak(utterance);
+        }
+    </script>
+    <script src="/static/chatbot.js"></script>
+</body>
+
+</html>
