@@ -161,7 +161,7 @@ travellai/
 ## 👩‍💻 Author
 
 **Soham Pandav**  
-[GitHub]([https://github.com/tejashreee29](https://github.com/soham111111))
+[GitHub]((https://github.com/soham111111))
 
 ---
 
