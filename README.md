@@ -160,8 +160,8 @@ travellai/
 
 ## 👩‍💻 Author
 
-**Tejashree Suvarna**  
-[GitHub](https://github.com/tejashreee29)
+**Soham Pandav**  
+[GitHub]([https://github.com/tejashreee29](https://github.com/soham111111))
 
 ---
 
